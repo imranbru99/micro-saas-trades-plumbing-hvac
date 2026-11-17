@@ -1,0 +1,57 @@
+services:
+  app:
+    build: .
+    container_name: tradeflow-app
+    ports:
+      - "8080:8000"
+    environment:
+      APP_NAME: "TradeFlow"
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8080
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: tradeflow
+      DB_USERNAME: tradeflow
+      DB_PASSWORD: secret
+      MODULE_CUSTOMERS: "true"
+      MODULE_DISPATCH: "true"
+      MODULE_ESTIMATES: "true"
+      MODULE_INVOICING: "true"
+      MODULE_TECHNICIAN_APP: "true"
+      MODULE_PLUMBING_TRADE: "true"
+      MODULE_HVAC_TRADE: "true"
+      MODULE_AI_ASSISTANT: "true"
+      MODULE_PARTS_CATALOG: "true"
+      MODULE_ATTENDANCE_OPS: "false"
+      MODULE_SPEED_OPTIMIZER: "true"
+      MODULE_UNICODE_DOCS: "true"
+      DEMO_USER_EMAIL: demo@tradeflow.test
+      DEMO_USER_PASSWORD: password
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - mysql
+    command: >
+      sh -c "composer install --no-interaction &&
+             php artisan key:generate --force &&
+             php artisan migrate --force &&
+             php artisan db:seed --force &&
+             php artisan serve --host=0.0.0.0 --port=8000"
+
+  mysql:
+    image: mysql:8.4
+    container_name: tradeflow-mysql
+    environment:
+      MYSQL_DATABASE: tradeflow
+      MYSQL_USER: tradeflow
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: rootsecret
+    ports:
+      - "3307:3306"
+    volumes:
+      - tradeflow_mysql:/var/lib/mysql
+
+volumes:
+  tradeflow_mysql:
